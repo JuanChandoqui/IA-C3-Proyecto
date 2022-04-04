@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(864, 571)
+        MainWindow.resize(882, 571)
         MainWindow.setStyleSheet("background-color: rgb(65, 89, 141);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -79,13 +79,20 @@ class Ui_MainWindow(object):
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(255, 68, 43);")
         self.pushButton_limpiar.setObjectName("pushButton_limpiar")
-        self.pushButton_verGrafica = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton_verGrafica.setGeometry(QtCore.QRect(710, 500, 111, 28))
-        self.pushButton_verGrafica.setStyleSheet("border-radius: 10px;\n"
+        self.pushButton_graficaLoss = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_graficaLoss.setGeometry(QtCore.QRect(750, 200, 111, 28))
+        self.pushButton_graficaLoss.setStyleSheet("border-radius: 10px;\n"
 "font: 75 8pt \"MS Shell Dlg 2\";\n"
 "color: rgb(255, 255, 255);\n"
 "background-color: rgb(170, 170, 0);")
-        self.pushButton_verGrafica.setObjectName("pushButton_verGrafica")
+        self.pushButton_graficaLoss.setObjectName("pushButton_graficaLoss")
+        self.pushButton_graficaAccuracy = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButton_graficaAccuracy.setGeometry(QtCore.QRect(740, 320, 131, 28))
+        self.pushButton_graficaAccuracy.setStyleSheet("border-radius: 10px;\n"
+"font: 75 8pt \"MS Shell Dlg 2\";\n"
+"color: rgb(255, 255, 255);\n"
+"background-color: rgb(170, 170, 0);")
+        self.pushButton_graficaAccuracy.setObjectName("pushButton_graficaAccuracy")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -102,4 +109,5 @@ class Ui_MainWindow(object):
         self.label_alert.setText(_translate("MainWindow", "Import a file!"))
         self.label_3.setText(_translate("MainWindow", "Selecccionar archivo:"))
         self.pushButton_limpiar.setText(_translate("MainWindow", "LIMPIAR"))
-        self.pushButton_verGrafica.setText(_translate("MainWindow", "VER GRÁFICA"))
+        self.pushButton_graficaLoss.setText(_translate("MainWindow", "GRÁFICA LOSS"))
+        self.pushButton_graficaAccuracy.setText(_translate("MainWindow", "GRÁFICA ACCURACY"))

@@ -2,6 +2,10 @@ import zipfile
 from keras.preprocessing.image import ImageDataGenerator
 import tensorflow as tf
 import os
+import matplotlib.pyplot as plt 
+from keras.models import load_model
+from keras.callbacks import CSVLogger
+import pandas as pd
 
 pathDataSet = './tmp'
 isExist = os.path.exists(pathDataSet)
@@ -19,9 +23,8 @@ else:
 width = 100
 height = 100
 rotationRange = 90
-heightShiftRange = 0.2
-widtShiftRange = 0.2
 verticalFlip=True
+horizontalFlip=True
 shearRange = 0.2
 zoomRange=[0.5, 1.5]
 fillMode ='nearest'
@@ -31,11 +34,10 @@ directorio_entrenamiento = "./tmp/Train/"
 generador_de_imagenes = ImageDataGenerator(
     rescale = 1./255,
     rotation_range = rotationRange,
-    height_shift_range = heightShiftRange,
-    width_shift_range=widtShiftRange,
     shear_range = shearRange,
     zoom_range=zoomRange,
     vertical_flip= verticalFlip,
+    horizontal_flip=horizontalFlip,
     fill_mode= fillMode
 )
 
@@ -51,19 +53,20 @@ directorio_entrenamiento = "./tmp/Validation/"
 generador_de_imagenes = ImageDataGenerator(
     rescale =1./255,
     rotation_range = rotationRange,
-    height_shift_range = heightShiftRange,
-    width_shift_range=widtShiftRange,
     shear_range = shearRange,
     zoom_range=zoomRange,
     vertical_flip= verticalFlip,
+    horizontal_flip=horizontalFlip,
     fill_mode= fillMode
 )
+
 generador_validaciones = generador_de_imagenes.flow_from_directory(
     directorio_entrenamiento,
     target_size= (width,height),
     class_mode = 'categorical',
     batch_size=126
 )
+
 
 def redNeuronalConvolucional():    
     model = tf.keras.models.Sequential([
@@ -88,7 +91,15 @@ def redNeuronalConvolucional():
         tf.keras.layers.Dense(8, activation='softmax')
     ])
 
+    csv_logger = CSVLogger('training.log', separator=',', append=False)
     model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.RMSprop(), metrics=['accuracy'])
-    history = model.fit_generator(generador_entrenamiento, epochs=40, validation_data=generador_validaciones, verbose=True, validation_steps=3)
+    history = model.fit(generador_entrenamiento, epochs=200, validation_data=generador_validaciones, verbose=True, callbacks=[csv_logger])
+
     model.save("model.h5")
+    
     return model, history, width, height
+
+def getModelSaved():
+    pathModel = './models_train/model_200.h5'
+    model = load_model(pathModel)
+    return model, width, height

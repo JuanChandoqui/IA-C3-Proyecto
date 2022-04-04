@@ -5,22 +5,24 @@ from numpy import double
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from Model.red_neuronal import redNeuronalConvolucional
+from Model.red_neuronal import getModelSaved, redNeuronalConvolucional
 from View.Ui_home_view import Ui_MainWindow
+import pandas as pd
 
 class HomeViewController(QMainWindow):
     def __init__(self):
         super(HomeViewController, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.modelo, self.history, self.widthImage, self.heightImage = redNeuronalConvolucional()
+        self.modelo, self.widthImage, self.heightImage = getModelSaved()
         self.label_img = QLabel()
         self.ui.label_file_sucessful.setVisible(False)
         self.ui.label_alert.setVisible(False)
         self.ui.pushButton_buscarArchivo.clicked.connect(self.openFileNameDialog)
         self.ui.pushButton_iniciarPrediccion.clicked.connect(self.cargarArchivo)
         self.ui.pushButton_limpiar.clicked.connect(self.limpiarImagen)
-        self.ui.pushButton_verGrafica.clicked.connect(self.generarGrafica)
+        self.ui.pushButton_graficaLoss.clicked.connect(self.generarGraficaLoss)
+        self.ui.pushButton_graficaAccuracy.clicked.connect(self.generarGraficaAcurracy)
         self.addGif()
 
 
@@ -89,12 +91,20 @@ class HomeViewController(QMainWindow):
         self.ui.verticalLayout_image.addWidget(self.label_img, alignment=Qt.AlignCenter)
 
 
-    def generarGrafica(self):
-        loss = self.history.history['loss']
-        # val_loss = history.history['val_loss']
-        # acc = history.history['accuracy']
-        # val_acc = history.history['val_accuracy']
+    def generarGraficaLoss(self):
+        loss = pd.read_csv("./FileSaved/history.csv")
+        loss = loss['loss']
         plt.plot(loss, label="LOSS RGB")
+        plt.legend()
+        plt.xlabel("iteraciones")
+        plt.ylabel("errores")
+        plt.show()
+        
+
+    def generarGraficaAcurracy(self):
+        loss = pd.read_csv("./FileSaved/history.csv")
+        loss = loss['accuracy']
+        plt.plot(loss, label="accuracy")
         plt.legend()
         plt.xlabel("iteraciones")
         plt.ylabel("errores")
