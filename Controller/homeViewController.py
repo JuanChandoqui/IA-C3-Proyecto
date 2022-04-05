@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QMainWindow, QFileDialog, QLabel
 from PyQt5.QtGui import QPixmap, QMovie
 from PyQt5.QtCore import Qt, QSize
+from keras.models import load_model
 from numpy import double
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from Model.red_neuronal import getModelSaved, redNeuronalConvolucional
+import pandas as pd
 from View.Ui_home_view import Ui_MainWindow
 import pandas as pd
 
@@ -14,15 +15,16 @@ class HomeViewController(QMainWindow):
         super(HomeViewController, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-        self.modelo, self.widthImage, self.heightImage = getModelSaved()
+        self.modelo = load_model("./Model/model.h5")
+        # self.modelo, self.history, self.widthImage, self.heightImage = redNeuronalConvolucional()
         self.label_img = QLabel()
+        self.history = pd.read_csv('./Model/training.log',sep=',',engine='python')
         self.ui.label_file_sucessful.setVisible(False)
         self.ui.label_alert.setVisible(False)
         self.ui.pushButton_buscarArchivo.clicked.connect(self.openFileNameDialog)
         self.ui.pushButton_iniciarPrediccion.clicked.connect(self.cargarArchivo)
         self.ui.pushButton_limpiar.clicked.connect(self.limpiarImagen)
-        self.ui.pushButton_graficaLoss.clicked.connect(self.generarGraficaLoss)
-        self.ui.pushButton_graficaAccuracy.clicked.connect(self.generarGraficaAcurracy)
+        self.ui.pushButton_verGrafica.clicked.connect(self.generarGrafica)
         self.addGif()
 
 
@@ -43,27 +45,27 @@ class HomeViewController(QMainWindow):
         else:
             resultTrain = ''
             imageEvalute = open(self.textFile)
-            img = tf.keras.preprocessing.image.load_img(imageEvalute.name, target_size=(self.widthImage,self.heightImage))
+            img = tf.keras.preprocessing.image.load_img(imageEvalute.name, target_size=(100,100))
             x = tf.keras.preprocessing.image.img_to_array(img)
             x = np.expand_dims(x, axis=0)
-            images = np.vstack([x])
-            result_1 = self.modelo.predict(images, batch_size=10)
-            print(f'Resultados: {result_1[0]}')
-            if(result_1[0][0] == 1):
+            result_1 = self.modelo.predict(x)
+            answer = np.argmax(result_1[0])
+            print(f'Resultado: {answer}')
+            if(answer == 0):
                 resultTrain = 'Broca'
-            elif(result_1[0][1] == 1):
-                resultTrain = 'Desarmador'
-            elif(result_1[0][2] == 1):
-                resultTrain = 'Llave Alen'
-            elif(result_1[0][3] == 1):
-                resultTrain = 'Llave'
-            elif(result_1[0][4] == 1):
+            elif(answer == 1):
                 resultTrain = 'Martillo'
-            elif(result_1[0][5] == 1):
+            elif(answer == 2):
+                resultTrain = 'Tornillo'
+            elif(answer == 3):
+                resultTrain = 'Llave'
+            elif(answer == 4):
+                resultTrain = 'Martillo'
+            elif(answer == 5):
                 resultTrain = 'Perica'
-            elif(result_1[0][6] == 1):
+            elif(answer == 6):
                 resultTrain = 'Remachadora'
-            elif(result_1[0][7] == 1):
+            elif(answer == 7):
                 resultTrain = 'Tornillo'
 
             self.label_img.setPixmap(QPixmap(self.textFile).scaled(500,400))
@@ -91,21 +93,27 @@ class HomeViewController(QMainWindow):
         self.ui.verticalLayout_image.addWidget(self.label_img, alignment=Qt.AlignCenter)
 
 
-    def generarGraficaLoss(self):
-        loss = pd.read_csv("./FileSaved/history.csv")
-        loss = loss['loss']
-        plt.plot(loss, label="LOSS RGB")
-        plt.legend()
-        plt.xlabel("iteraciones")
-        plt.ylabel("errores")
-        plt.show()
-        
+    def generarGrafica(self):
+        loss = self.history['loss']
+        val_loss = self.history['val_loss']
+        acc = self.history['accuracy']
+        val_acc = self.history['val_accuracy']
 
-    def generarGraficaAcurracy(self):
-        loss = pd.read_csv("./FileSaved/history.csv")
-        loss = loss['accuracy']
-        plt.plot(loss, label="accuracy")
+        plt.subplot(1,2,1)
+        plt.plot(loss, label="Training loss")
+        plt.plot(val_loss, label="Validation loss")
         plt.legend()
-        plt.xlabel("iteraciones")
-        plt.ylabel("errores")
+        plt.xlabel("Iteraciones")
+        plt.ylabel("Errores")
+        plt.title("LOSS")
+
+        plt.subplot(1,2,2)
+        plt.plot(acc, label="Training accuracy")
+        plt.plot(val_acc, label="Validation accuracy")
+        plt.title("Accuracy")
+
+        plt.xlabel("Iteraciones")
+        plt.ylabel("Accuracy")
+        plt.legend()
+
         plt.show()
